@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTrack Wireframes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    .page-title {
+      padding: 24px 32px 8px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .container {
+      display: grid;
+      gap: 24px;
+      padding: 0 32px 32px;
+    }
+    .wireframe-card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+    .mock-header {
+      background: #eef2ff;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 700;
+      font-size: 16px;
+      color: #4338ca;
+    }
+    .wireframe-body {
+      padding: 24px;
+    }
+    .dashboard-layout,
+    .kanban-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 20px;
+    }
+    .sidebar {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 640px;
+    }
+    .sidebar h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #374151;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav-item {
+      display: block;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #111827;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .nav-item.active {
+      background: #4338ca;
+      color: #ffffff;
+      border-color: #4338ca;
+    }
+    .workspace {
+      display: grid;
+      gap: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #eef2ff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px 22px;
+    }
+    .topbar .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #4b5563;
+      font-size: 13px;
+    }
+    .topbar .profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #6366f1;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+    }
+    .profile-info {
+      display: grid;
+      gap: 3px;
+      text-align: right;
+      line-height: 1.2;
+    }
+    .profile-info .name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .kpi-card span {
+      display: block;
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .kpi-card .value {
+      font-size: 30px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .panel {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 20px;
+      display: grid;
+      gap: 18px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #111827;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .chart-placeholder,
+    .activity-feed {
+      background: #f3f4f6;
+      border: 1px dashed #d1d5db;
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 220px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .activity-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 0;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4338ca;
+      margin-top: 4px;
+    }
+    .activity-text {
+      color: #374151;
+      font-size: 14px;
+    }
+    .activity-meta {
+      color: #6b7280;
+      font-size: 12px;
+    }
+    .assistant-button {
+      position: fixed;
+      right: 32px;
+      bottom: 32px;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: none;
+      background: #4338ca;
+      color: white;
+      font-size: 28px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 40px rgba(67, 56, 202, 0.24);
+      cursor: pointer;
+    }
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .column {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 560px;
+      display: grid;
+      gap: 16px;
+    }
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #111827;
+    }
+    .column-count {
+      background: #e5e7eb;
+      border-radius: 999px;
+      color: #374151;
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+    .task-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      min-height: 120px;
+    }
+    .task-title {
+      font-weight: 700;
+      color: #111827;
+      font-size: 14px;
+    }
+    .task-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .assignee {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+      font-size: 13px;
+    }
+    .avatar-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #c7d2fe;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .priority-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+    .priority-high { background: #fee2e2; color: #b91c1c; }
+    .priority-medium { background: #fef3c7; color: #92400e; }
+    .priority-low { background: #dcfce7; color: #166534; }
+    .due-date { color: #6b7280; font-size: 12px; }
+    @media (max-width: 1180px) {
+      .dashboard-layout,
+      .kanban-layout { grid-template-columns: 1fr; }
+      .sidebar { min-height: auto; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kanban-board { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">DevTrack Wireframes</div>
+  <div class="container">
+    <div class="wireframe-card">
+      <div class="mock-header">Diagram 3 — UI Wireframe: Global Dashboard</div>
+      <div class="wireframe-body">
+        <div class="dashboard-layout">
+          <aside class="sidebar">
+            <h3>Navigation</h3>
+            <a href="#" class="nav-item active">Dashboard</a>
+            <a href="#" class="nav-item">Projects</a>
+            <a href="#" class="nav-item">Tasks</a>
+            <a href="#" class="nav-item">Bugs</a>
+            <a href="#" class="nav-item">Sprints</a>
+            <a href="#" class="nav-item">Reports</a>
+            <a href="#" class="nav-item">Team</a>
+          </aside>
+          <section class="workspace">
+            <div class="topbar">
+              <div class="breadcrumbs">Global Dashboard</div>
+              <div class="profile">
+                <div class="profile-avatar">DG</div>
+                <div class="profile-info">
+                  <div class="name">Dana Green</div>
+                  <div class="meta">Product Manager</div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-grid">
+              <div class="kpi-card"><span>Active Projects</span><div class="value">12</div></div>
+              <div class="kpi-card"><span>Open Tasks</span><div class="value">48</div></div>
+              <div class="kpi-card"><span>Open Bugs</span><div class="value">16</div></div>
+              <div class="kpi-card"><span>Milestones Done</span><div class="value">8</div></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">Velocity / Progress</div>
+              <div class="chart-placeholder">Velocity bar chart placeholder</div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">Recent Activity</div>
+              <div class="activity-feed">
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="activity-text">Task “API integration” moved to In Progress.</div>
+                  <div class="activity-meta">10 min ago</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="activity-text">Bug “Login validation” assigned to Omar.</div>
+                  <div class="activity-meta">30 min ago</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+                  <div class="activity-text">Sprint planning updated for Project Phoenix.</div>
+                  <div class="activity-meta">1 hr ago</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <div class="wireframe-card">
+      <div class="mock-header">Diagram 4 — UI Wireframe: Kanban Task Board</div>
+      <div class="wireframe-body">
+        <div class="kanban-layout">
+          <div class="column">
+            <div class="column-header"><span>To Do</span><span class="column-count">3</span></div>
+            <div class="task-card">
+              <div class="task-title">Design login flow</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">EM</div>Emma</div>
+                <div class="priority-badge priority-high">High</div>
+              </div>
+              <div class="due-date">Due May 8</div>
+            </div>
+            <div class="task-card">
+              <div class="task-title">Write API spec</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">AS</div>Asha</div>
+                <div class="priority-badge priority-medium">Medium</div>
+              </div>
+              <div class="due-date">Due May 10</div>
+            </div>
+            <div class="task-card">
+              <div class="task-title">Prepare release notes</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">NR</div>Noah</div>
+                <div class="priority-badge priority-low">Low</div>
+              </div>
+              <div class="due-date">Due May 14</div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="column-header"><span>In Progress</span><span class="column-count">2</span></div>
+            <div class="task-card">
+              <div class="task-title">Implement task board</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">JC</div>Jade</div>
+                <div class="priority-badge priority-high">High</div>
+              </div>
+              <div class="due-date">Due May 6</div>
+            </div>
+            <div class="task-card">
+              <div class="task-title">Fix authentication bug</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">MK</div>Mila</div>
+                <div class="priority-badge priority-medium">Medium</div>
+              </div>
+              <div class="due-date">Due May 7</div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="column-header"><span>Done</span><span class="column-count">2</span></div>
+            <div class="task-card">
+              <div class="task-title">Create project schema</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">LP</div>Lina</div>
+                <div class="priority-badge priority-low">Low</div>
+              </div>
+              <div class="due-date">Completed</div>
+            </div>
+            <div class="task-card">
+              <div class="task-title">Review UI layout</div>
+              <div class="task-row">
+                <div class="assignee"><div class="avatar-badge">JT</div>Jay</div>
+                <div class="priority-badge priority-medium">Medium</div>
+              </div>
+              <div class="due-date">Completed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="assistant-button" aria-label="AI assistant">✨</button>
+</body>
+</html>
