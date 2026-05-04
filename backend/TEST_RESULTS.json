@@ -1,0 +1,24 @@
+{
+  "executedAt": "2026-05-04T19:54:56.278Z",
+  "environment": {
+    "platform": "win32",
+    "nodeVersion": "v25.2.1",
+    "timestamp": "5/5/2026, 12:54:56 AM",
+    "baseUrl": "http://localhost:5000"
+  },
+  "testPhases": {
+    "unit": {
+      "status": "error",
+      "error": "Cannot find module './backend/test/unit.test.js'\nRequire stack:\n- C:\\Users\\Muhammad Kumail\\Desktop\\DEV\\DevTrack\\backend\\test\\runAllTests.js"
+    },
+    "integration": {
+      "status": "error",
+      "error": "Cannot find module './backend/test/integration.test.js'\nRequire stack:\n- C:\\Users\\Muhammad Kumail\\Desktop\\DEV\\DevTrack\\backend\\test\\runAllTests.js"
+    },
+    "frontend": {
+      "status": "error",
+      "error": "Cannot find module './frontend/test/frontend.test.js'\nRequire stack:\n- C:\\Users\\Muhammad Kumail\\Desktop\\DEV\\DevTrack\\backend\\test\\runAllTests.js"
+    }
+  },
+  "summary": {}
+}
