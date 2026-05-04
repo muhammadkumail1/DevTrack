@@ -37,7 +37,7 @@ function BugForm({ initial, projects, users, onSave, onClose }) {
   );
 }
 
-function Bugs() {
+function Bugs({ setPage }) {
   const toast = useToast();
   const [bugs, setBugs]         = React.useState([]);
   const [loading, setLoading]   = React.useState(true);
@@ -94,8 +94,16 @@ function Bugs() {
     loading ? React.createElement(Spinner) :
     bugs.length === 0 ? React.createElement(Empty, { icon: '⬡', text: 'No bugs found' }) :
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 130px 100px 120px 120px 140px', gap: 12, padding: '6px 14px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 600, borderBottom: '1px solid var(--border)' } },
+        React.createElement('div', null, 'Title'),
+        React.createElement('div', null, 'Project'),
+        React.createElement('div', null, 'Severity'),
+        React.createElement('div', null, 'Status'),
+        React.createElement('div', null, 'Assigned'),
+        React.createElement('div', null, '')
+      ),
       bugs.map(b =>
-        React.createElement('div', { key: b._id, style: { display: 'grid', gridTemplateColumns: '1fr 130px 100px 120px 120px 120px', gap: 12, padding: '10px 14px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
+        React.createElement('div', { key: b._id, style: { display: 'grid', gridTemplateColumns: '1fr 130px 100px 120px 120px 140px', gap: 12, padding: '10px 14px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontWeight: 500, fontSize: 13 } }, b.title),
             b.description && React.createElement('div', { style: { fontSize: 11, color: 'var(--text3)', marginTop: 1 } }, b.description.slice(0, 60) + (b.description.length > 60 ? '...' : ''))
@@ -104,7 +112,7 @@ function Bugs() {
           React.createElement('span', { style: { fontSize: 11, color: sevColor[b.severity], fontFamily: "'DM Mono',monospace", fontWeight: 500 } }, b.severity),
           React.createElement(StatusBadge, { status: b.status }),
           React.createElement('div', { style: { fontSize: 12, color: 'var(--text2)' } }, b.assignedTo?.name || '—'),
-          React.createElement('div', { style: { display: 'flex', gap: 4 } },
+          React.createElement('div', { style: { display: 'flex', gap: 4, justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' } },
             React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(b) }, 'Edit'),
             b.status !== 'Closed' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => close(b._id) }, 'Close'),
             React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(b._id) }, 'Del')

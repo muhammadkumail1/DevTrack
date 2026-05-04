@@ -1,5 +1,5 @@
 // pages/Roles.js
-function Roles() {
+function Roles({ setPage }) {
   const toast = useToast();
   const [roles, setRoles]     = React.useState([]);
   const [loading, setLoading] = React.useState(true);

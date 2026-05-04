@@ -1,5 +1,5 @@
 // pages/Milestones.js
-function Milestones() {
+function Milestones({ setPage }) {
   const { user } = useAuth();
   const toast = useToast();
   const [items, setItems]       = React.useState([]);
@@ -30,6 +30,13 @@ function Milestones() {
     loading ? React.createElement(Spinner) :
     items.length === 0 ? React.createElement(Empty, { icon: '◆', text: 'No milestones' }) :
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 150px 120px 100px 140px', gap: 12, padding: '6px 14px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 600, borderBottom: '1px solid var(--border)' } },
+        React.createElement('div', null, 'Title'),
+        React.createElement('div', null, 'Project'),
+        React.createElement('div', null, 'Due Date'),
+        React.createElement('div', null, 'Status'),
+        React.createElement('div', null, '')
+      ),
       items.map(m =>
         React.createElement('div', { key: m._id, style: { display: 'grid', gridTemplateColumns: '1fr 150px 120px 100px 140px', gap: 12, padding: '12px 14px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
           React.createElement('div', null,

@@ -3,24 +3,58 @@ const Task = require("../models/Task");
 const Bug = require("../models/Bug");
 const Sprint = require("../models/Sprint");
 const WorkLog = require("../models/WorkLog");
+const Requirement = require("../models/Requirement");
+const Milestone = require("../models/Milestone");
+const ChangeRequest = require("../models/ChangeRequest");
+const User = require("../models/User");
 
 exports.getDashboardStats = async (req, res) => {
   try {
     const projects = await Project.find();
     const activeProjects = projects.filter((p) => p.status === "Active").length;
+    const totalProjects = projects.length;
+    
     const tasks = await Task.find();
     const inProgress = tasks.filter((t) => t.status === "In Progress").length;
     const completed = tasks.filter((t) => t.status === "Done").length;
+    const totalTasks = tasks.length;
+    
     const bugs = await Bug.find();
     const openBugs = bugs.filter((b) => b.status !== "Closed" && b.status !== "Resolved").length;
     const criticalBugs = bugs.filter((b) => b.severity === "Critical" && b.status !== "Closed").length;
+    const totalBugs = bugs.length;
+    
+    const sprints = await Sprint.find();
+    const activeSprints = sprints.filter((s) => s.status === "Active").length;
+    const totalSprints = sprints.length;
+    
+    const milestones = await Milestone.find();
+    const completedMilestones = milestones.filter((m) => m.status === "Completed").length;
+    const totalMilestones = milestones.length;
+    
+    const requirements = await Requirement.find();
+    const totalRequirements = requirements.length;
+    
+    const changeRequests = await ChangeRequest.find();
+    const openChangeRequests = changeRequests.filter((cr) => cr.status !== "Completed").length;
+    const totalChangeRequests = changeRequests.length;
+    
+    const workLogs = await WorkLog.find();
+    const totalWorkLogs = workLogs.length;
+    
+    const users = await User.find();
+    const totalTeamMembers = users.length;
 
     res.json({
-      activeProjects,
-      activeTasks: inProgress,
-      completedTasks: completed,
-      openBugs,
-      criticalBugs,
+      projects: { total: totalProjects, active: activeProjects },
+      tasks: { total: totalTasks, inProgress, completed },
+      bugs: { total: totalBugs, open: openBugs, critical: criticalBugs },
+      sprints: { total: totalSprints, active: activeSprints },
+      milestones: { total: totalMilestones, completed: completedMilestones },
+      requirements: { total: totalRequirements },
+      changeRequests: { total: totalChangeRequests, open: openChangeRequests },
+      workLogs: { total: totalWorkLogs },
+      team: { total: totalTeamMembers }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

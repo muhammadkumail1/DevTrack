@@ -47,7 +47,7 @@ function TaskForm({ initial, projects, users, sprints, onSave, onClose }) {
   );
 }
 
-function Tasks() {
+function Tasks({ setPage }) {
   const toast = useToast();
   const [tasks, setTasks]       = React.useState([]);
   const [loading, setLoading]   = React.useState(true);
@@ -100,11 +100,17 @@ function Tasks() {
     loading ? React.createElement(Spinner) :
     tasks.length === 0 ? React.createElement(Empty, { icon: '◻', text: 'No tasks found' }) :
     React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
-      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 130px 120px 100px 120px 100px 80px', gap: 12, padding: '6px 12px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase' } },
-        'Title', 'Project', 'Assigned', 'Priority', 'Status', 'Due', ''
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 130px 120px 100px 120px 100px 120px', gap: 12, padding: '6px 12px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 600, borderBottom: '1px solid var(--border)' } },
+        React.createElement('div', null, 'Title'),
+        React.createElement('div', null, 'Project'),
+        React.createElement('div', null, 'Assigned'),
+        React.createElement('div', null, 'Priority'),
+        React.createElement('div', null, 'Status'),
+        React.createElement('div', null, 'Due'),
+        React.createElement('div', null, '')
       ),
       tasks.map(t =>
-        React.createElement('div', { key: t._id, style: { display: 'grid', gridTemplateColumns: '1fr 130px 120px 100px 120px 100px 80px', gap: 12, padding: '10px 12px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
+        React.createElement('div', { key: t._id, style: { display: 'grid', gridTemplateColumns: '1fr 130px 120px 100px 120px 100px 120px', gap: 12, padding: '10px 12px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontWeight: 500, fontSize: 13 } }, t.title),
             t.description && React.createElement('div', { style: { fontSize: 11, color: 'var(--text3)', marginTop: 1 } }, t.description.slice(0, 60) + (t.description.length > 60 ? '...' : ''))
@@ -114,7 +120,7 @@ function Tasks() {
           React.createElement('span', { style: { fontSize: 11, color: priorityColor[t.priority] || 'var(--text3)', fontFamily: "'DM Mono',monospace" } }, t.priority),
           React.createElement(StatusBadge, { status: t.status }),
           React.createElement('div', { style: { fontSize: 11, color: 'var(--text3)' } }, fmt(t.dueDate)),
-          React.createElement('div', { style: { display: 'flex', gap: 4 } },
+          React.createElement('div', { style: { display: 'flex', gap: 4, justifyContent: 'flex-start', alignItems: 'center' } },
             React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(t) }, 'Edit'),
             React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(t._id) }, 'Del')
           )

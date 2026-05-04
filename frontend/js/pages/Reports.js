@@ -1,5 +1,5 @@
 // pages/Reports.js
-function Reports() {
+function Reports({ setPage }) {
   const [projects, setProjects] = React.useState([]);
   const [selected, setSelected] = React.useState('');
   const [report, setReport]     = React.useState(null);
@@ -83,8 +83,13 @@ function Reports() {
     !report && team.length > 0 && React.createElement('div', null,
       React.createElement('h2', { style: { fontSize: 11, color: 'var(--text2)', marginBottom: 12, fontWeight: 600, letterSpacing: '.4px', textTransform: 'uppercase' } }, 'Team Performance'),
       React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
-        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px 80px', gap: 12, padding: '6px 12px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase' } },
-          'Member', 'Role', 'Done', 'Bugs', 'Open', 'Hours'
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px 80px', gap: 12, padding: '6px 12px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 600, borderBottom: '1px solid var(--border)' } },
+          React.createElement('div', null, 'Member'),
+          React.createElement('div', null, 'Role'),
+          React.createElement('div', null, 'Done'),
+          React.createElement('div', null, 'Bugs'),
+          React.createElement('div', null, 'Open'),
+          React.createElement('div', null, 'Hours')
         ),
         team.map(m =>
           React.createElement('div', { key: m._id, style: { display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px 80px', gap: 12, padding: '10px 12px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },

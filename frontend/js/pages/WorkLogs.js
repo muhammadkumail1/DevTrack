@@ -1,5 +1,5 @@
 // pages/WorkLogs.js
-function WorkLogs() {
+function WorkLogs({ setPage }) {
   const { user } = useAuth();
   const toast = useToast();
   const [worklogs, setWorklogs] = React.useState([]);
@@ -90,21 +90,21 @@ function WorkLogs() {
 
     loading ? React.createElement(Spinner) :
       React.createElement('div', { style: { display: 'grid', gap: 14 } },
-        React.createElement('div', { className: 'tbl-head', style: { gridTemplateColumns: '2fr 1.2fr 1fr 1fr 1fr', alignItems: 'center' } },
-          React.createElement('span', null, 'Member'),
-          React.createElement('span', null, 'Task'),
-          React.createElement('span', null, 'Hours'),
-          React.createElement('span', null, 'Date'),
-          React.createElement('span', null, 'Actions')
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr 1fr', gap: 12, padding: '6px 12px', fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 600, borderBottom: '1px solid var(--border)', alignItems: 'center' } },
+          React.createElement('div', null, 'Member'),
+          React.createElement('div', null, 'Task'),
+          React.createElement('div', null, 'Hours'),
+          React.createElement('div', null, 'Date'),
+          React.createElement('div', null, 'Actions')
         ),
         worklogs.length === 0 ? React.createElement(Empty, { icon: '⌛', text: 'No work logs recorded yet' }) :
           worklogs.map((entry) =>
-            React.createElement('div', { key: entry._id, className: 'tbl-row', style: { gridTemplateColumns: '2fr 1.2fr 1fr 1fr 1fr', alignItems: 'center' } },
-              React.createElement('span', null, entry.user?.name || 'Unknown'),
-              React.createElement('span', null, entry.task?.title || 'Unassigned'),
-              React.createElement('span', null, entry.hours + 'h'),
-              React.createElement('span', null, fmt(entry.date)),
-              React.createElement('span', null,
+            React.createElement('div', { key: entry._id, className: 'tbl-row', style: { display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr 1fr', gap: 12, padding: '10px 12px', background: 'var(--bg2)', borderRadius: 8, border: '1px solid var(--border)', alignItems: 'center' } },
+              React.createElement('div', null, entry.user?.name || 'Unknown'),
+              React.createElement('div', null, entry.task?.title || 'Unassigned'),
+              React.createElement('div', null, entry.hours + 'h'),
+              React.createElement('div', null, fmt(entry.date)),
+              React.createElement('div', { style: { display: 'flex', gap: 4 } },
                 React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(entry) }, 'Edit'),
                 React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => remove(entry._id) }, 'Del')
               )

@@ -1,5 +1,5 @@
 // pages/Team.js
-function Team() {
+function Team({ setPage }) {
   const toast = useToast();
   const [users, setUsers]     = React.useState([]);
   const [loading, setLoading] = React.useState(true);

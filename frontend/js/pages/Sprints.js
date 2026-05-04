@@ -1,5 +1,5 @@
 // pages/Sprints.js
-function Sprints() {
+function Sprints({ setPage }) {
   const { user } = useAuth();
   const toast = useToast();
   const [sprints, setSprints]   = React.useState([]);

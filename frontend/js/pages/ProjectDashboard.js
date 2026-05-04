@@ -635,8 +635,8 @@
         )
       ),
       e('div', { className: 'pd-tbl-head', style: { gridTemplateColumns: gridTpl } },
-        e('span', null, 'Title'), e('span', null, 'Priority'), e('span', null, 'Status'),
-        e('span', null, 'Assignee'), e('span', null, 'Due')
+        e('div', null, 'Title'), e('div', null, 'Priority'), e('div', null, 'Status'),
+        e('div', null, 'Assignee'), e('div', null, 'Due')
       ),
       filtered.length === 0
         ? e(PdEmpty, { icon: '◻', text: 'No tasks match filters' })
@@ -693,7 +693,7 @@
         e('span', { style: { fontSize: 12, color: 'var(--text3)' } }, filtered.length + ' bugs')
       ),
       e('div', { className: 'pd-tbl-head', style: { gridTemplateColumns: gridTpl } },
-        e('span', null, 'Title'), e('span', null, 'Severity'), e('span', null, 'Status'), e('span', null, 'Assigned')
+        e('div', null, 'Title'), e('div', null, 'Severity'), e('div', null, 'Status'), e('div', null, 'Assigned')
       ),
       filtered.length === 0
         ? e(PdEmpty, { icon: '⬡', text: 'No bugs found' })

@@ -3,9 +3,9 @@ function App() {
   const { user, loading } = useAuth();
   const [page, setPage] = React.useState('dashboard');
 
-  if (loading) return React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' } },
-    React.createElement(Spinner)
-  );
+  if (loading) return React.createElement('div', {
+    style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }
+  }, React.createElement(Spinner));
 
   if (!user) return React.createElement(AuthPage);
 
@@ -18,17 +18,14 @@ function App() {
     milestones: Milestones,
     reports:    Reports,
     team:       Team,
-    roles:      Roles,
-    worklogs:   WorkLogs,
   };
 
   const Page = pages[page] || Dashboard;
 
-  return React.createElement(React.Fragment, null,
-    React.createElement(Layout, { page, setPage },
-      React.createElement(Page)
-    ),
-    React.createElement(AIAssistant, null)
+  return React.createElement(Layout, { page, setPage },
+    React.createElement(Page, { setPage }),
+    // AI Assistant mounted at root level — has access to setPage for full navigation
+    React.createElement(AIAssistant, { setPage })
   );
 }
 

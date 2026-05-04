@@ -22,7 +22,7 @@ function ProjectForm({ initial, onSave, onClose }) {
   );
 }
 
-function Projects() {
+function Projects({ setPage }) {
   const { user } = useAuth();
   const toast = useToast();
   const [projects, setProjects] = React.useState([]);

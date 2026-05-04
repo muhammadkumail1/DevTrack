@@ -24,7 +24,7 @@ function ToastProvider({ children }) {
   return React.createElement(ToastCtx.Provider, { value: show },
     children,
     React.createElement('div', {
-      style: { position: 'fixed', bottom: 20, right: 20, zIndex: 999, display: 'flex', flexDirection: 'column', gap: 8 }
+      style: { position: 'fixed', top: 20, right: 20, zIndex: 999, display: 'flex', flexDirection: 'column', gap: 8 }
     },
       toasts.map(t => React.createElement('div', { key: t.id, style: toastStyle(t.type) }, t.msg))
     )
