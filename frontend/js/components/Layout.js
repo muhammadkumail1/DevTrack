@@ -13,7 +13,9 @@ function Sidebar({ page, setPage }) {
     { id: 'milestones', icon: 'fa-solid fa-flag-checkered',  label: 'Milestones' },
     { id: 'reports',    icon: 'fa-solid fa-chart-bar',       label: 'Reports'    },
     { id: 'worklogs',   icon: 'fa-solid fa-clock',           label: 'Work Logs'  },
+    // Team: visible to Managers and Admins only
     ...(canManage ? [{ id: 'team',  icon: 'fa-solid fa-users', label: 'Team'  }] : []),
+    // Roles: Admin only
     ...(isAdmin   ? [{ id: 'roles', icon: 'fa-solid fa-gear',  label: 'Roles' }] : []),
   ];
 

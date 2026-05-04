@@ -599,19 +599,60 @@
   }
 
   /* ─────────────────────────────────────────────
-     Backlog tab
+     Backlog tab — with inline task creation & assignment
   ───────────────────────────────────────────── */
-  function BacklogTab({ projectId }) {
+  function BacklogTab({ projectId, canManage }) {
     const [tasks, setTasks] = React.useState([]);
+    const [members, setMembers] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [sFilter, setSFilter] = React.useState('');
     const [pFilter, setPFilter] = React.useState('');
-    const gridTpl = '1fr 90px 110px 140px 100px';
+    const [showForm, setShowForm] = React.useState(false);
+    const [editTask, setEditTask] = React.useState(null);
+    const [form, setForm] = React.useState({ title: '', assignedTo: '', priority: 'Medium', status: 'To Do', dueDate: '' });
+    const toast = useToast();
+    const gridTpl = '1fr 90px 110px 140px 100px 100px';
 
-    React.useEffect(() => {
+    const load = () => {
       setLoading(true);
-      api.get('/tasks?project=' + projectId).then(d => { Array.isArray(d) && setTasks(d); setLoading(false); });
-    }, [projectId]);
+      Promise.all([
+        api.get('/tasks?project=' + projectId),
+        api.get('/projects/' + projectId + '/members')
+      ]).then(([td, md]) => {
+        Array.isArray(td) && setTasks(td);
+        Array.isArray(md) && setMembers(md);
+        setLoading(false);
+      });
+    };
+    React.useEffect(() => { load(); }, [projectId]);
+
+    const openNew = () => {
+      setForm({ title: '', assignedTo: '', priority: 'Medium', status: 'To Do', dueDate: '' });
+      setEditTask(null);
+      setShowForm(true);
+    };
+    const openEdit = (t) => {
+      setForm({ title: t.title, assignedTo: t.assignedTo?._id || '', priority: t.priority, status: t.status, dueDate: t.dueDate?.split('T')[0] || '' });
+      setEditTask(t);
+      setShowForm(true);
+    };
+    const closeForm = () => { setShowForm(false); setEditTask(null); };
+
+    const save = async () => {
+      if (!form.title.trim()) { toast('Title is required', 'error'); return; }
+      const payload = { ...form, project: projectId, assignedTo: form.assignedTo || undefined };
+      const r = editTask
+        ? await api.put('/tasks/' + editTask._id, payload)
+        : await api.post('/tasks', payload);
+      if (r._id) { toast(editTask ? 'Task updated' : 'Task created', 'success'); closeForm(); load(); }
+      else toast(r.message || 'Error', 'error');
+    };
+
+    const del = async (id) => {
+      if (!confirm('Delete this task?')) return;
+      await api.del('/tasks/' + id);
+      toast('Deleted'); load();
+    };
 
     if (loading) return e(Spinner);
 
@@ -621,7 +662,8 @@
     );
 
     return e('div', { className: 'pd-fade' },
-      e('div', { style: { display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' } },
+      // Toolbar
+      e('div', { style: { display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' } },
         e('select', { value: sFilter, onChange: ex => setSFilter(ex.target.value), style: { width: 140 } },
           e('option', { value: '' }, 'All Status'),
           ['To Do', 'In Progress', 'Done'].map(s => e('option', { key: s, value: s }, s))
@@ -630,13 +672,49 @@
           e('option', { value: '' }, 'All Priority'),
           ['Low', 'Medium', 'High'].map(p => e('option', { key: p, value: p }, p))
         ),
-        e('span', { style: { fontSize: 12, color: 'var(--text3)', alignSelf: 'center', marginLeft: 4 } },
-          filtered.length + ' tasks'
+        e('span', { style: { fontSize: 12, color: 'var(--text3)', flex: 1 } }, filtered.length + ' tasks'),
+        e('button', { className: 'btn btn-sm', onClick: openNew }, '+ New Task')
+      ),
+
+      // Inline task form
+      showForm && e('div', { style: { background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 10, padding: 16, marginBottom: 16 } },
+        e('div', { style: { fontWeight: 600, fontSize: 13, marginBottom: 12, color: 'var(--text)' } }, editTask ? 'Edit Task' : 'New Task'),
+        e('div', { className: 'grid2' },
+          e(Field, { label: 'Title' },
+            e('input', { value: form.title, onChange: ex => setForm(p => ({ ...p, title: ex.target.value })), placeholder: 'Task title' })
+          ),
+          e(Field, { label: 'Assign To' },
+            e('select', { value: form.assignedTo, onChange: ex => setForm(p => ({ ...p, assignedTo: ex.target.value })) },
+              e('option', { value: '' }, '— Unassigned —'),
+              members.map(m => e('option', { key: m._id, value: m._id }, m.name + ' (' + m.role + ')'))
+            )
+          )
+        ),
+        e('div', { className: 'grid2' },
+          e(Field, { label: 'Priority' },
+            e('select', { value: form.priority, onChange: ex => setForm(p => ({ ...p, priority: ex.target.value })) },
+              ['Low', 'Medium', 'High'].map(v => e('option', { key: v, value: v }, v))
+            )
+          ),
+          e(Field, { label: 'Status' },
+            e('select', { value: form.status, onChange: ex => setForm(p => ({ ...p, status: ex.target.value })) },
+              ['To Do', 'In Progress', 'Done'].map(v => e('option', { key: v, value: v }, v))
+            )
+          )
+        ),
+        e(Field, { label: 'Due Date' },
+          e('input', { type: 'date', value: form.dueDate, onChange: ex => setForm(p => ({ ...p, dueDate: ex.target.value })) })
+        ),
+        e('div', { style: { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 } },
+          e('button', { className: 'btn btn-ghost btn-sm', onClick: closeForm }, 'Cancel'),
+          e('button', { className: 'btn btn-sm', onClick: save }, editTask ? 'Update' : 'Create Task')
         )
       ),
+
+      // Table
       e('div', { className: 'pd-tbl-head', style: { gridTemplateColumns: gridTpl } },
         e('div', null, 'Title'), e('div', null, 'Priority'), e('div', null, 'Status'),
-        e('div', null, 'Assignee'), e('div', null, 'Due')
+        e('div', null, 'Assignee'), e('div', null, 'Due'), e('div', null, '')
       ),
       filtered.length === 0
         ? e(PdEmpty, { icon: '◻', text: 'No tasks match filters' })
@@ -660,7 +738,11 @@
                   color: t.dueDate && daysFrom(t.dueDate) < 0 && t.status !== 'Done'
                     ? 'var(--red)' : 'var(--text3)'
                 }
-              }, fmt(t.dueDate))
+              }, fmt(t.dueDate)),
+              e('div', { style: { display: 'flex', gap: 4 } },
+                e('button', { className: 'pd-move-btn', onClick: () => openEdit(t) }, '✎'),
+                canManage && e('button', { className: 'pd-move-btn', style: { color: 'var(--red)', borderColor: 'transparent' }, onClick: () => del(t._id) }, '✕')
+              )
             )
           )
     );
@@ -714,45 +796,116 @@
   }
 
   /* ─────────────────────────────────────────────
-     Team tab
+     Team tab — with member management
   ───────────────────────────────────────────── */
-  function TeamTab({ memberWorkload }) {
-    if (!memberWorkload || memberWorkload.length === 0) return e(PdEmpty, { icon: '◑', text: 'No team members' });
+  function TeamTab({ projectId, memberWorkload, canManage, onMembersChanged }) {
+    const [allUsers, setAllUsers] = React.useState([]);
+    const [members, setMembers] = React.useState(memberWorkload || []);
+    const [addId, setAddId] = React.useState('');
+    const [showAddPanel, setShowAddPanel] = React.useState(false);
+    const toast = useToast();
 
-    return e('div', { className: 'pd-team-grid pd-fade' },
-      memberWorkload.map(m => {
-        const pct = m.total > 0 ? Math.round((m.done / m.total) * 100) : 0;
-        const user = m.user;
-        if (!user) return null;
-        return e('div', { key: user._id, className: 'pd-card' },
-          e('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 } },
-            e(PdAvatar, { name: user.name, size: 'md' }),
-            e('div', null,
-              e('div', { style: { fontWeight: 600, fontSize: 14, color: 'var(--text)' } }, user.name),
-              e('div', { style: { fontSize: 12, color: 'var(--text3)' } }, m.projectRole || user.role)
-            )
-          ),
-          e('div', { className: 'pd-stat-row' },
-            e('div', { className: 'pd-stat-item' },
-              e('div', { className: 'pd-stat-num', style: { color: 'var(--text)' } }, m.total),
-              e('div', { className: 'pd-stat-lbl' }, 'Total')
+    // Sync members from parent whenever overview data refreshes
+    React.useEffect(() => { setMembers(memberWorkload || []); }, [memberWorkload]);
+    // Fetch all users for the add-member dropdown
+    React.useEffect(() => { api.get('/users').then(d => Array.isArray(d) && setAllUsers(d)); }, []);
+
+    const memberIds = members.map(m => m.user?._id).filter(Boolean);
+    const available = allUsers.filter(u => !memberIds.includes(u._id));
+
+    const addMember = async () => {
+      if (!addId) return;
+      const r = await api.patch('/projects/' + projectId + '/members/add', { userId: addId });
+      if (r._id || r.members) {
+        toast('Member added', 'success');
+        setAddId('');
+        setShowAddPanel(false);
+        onMembersChanged?.();
+      } else toast(r.message || 'Error', 'error');
+    };
+
+    const removeMember = async (userId) => {
+      if (!confirm('Remove this member from the project?')) return;
+      const r = await api.patch('/projects/' + projectId + '/members/remove', { userId });
+      if (r._id || r.members) {
+        toast('Member removed', 'success');
+        onMembersChanged?.();
+      } else toast(r.message || 'Error', 'error');
+    };
+
+    if (!members || members.length === 0) return e('div', null,
+      canManage && e('div', { style: { marginBottom: 16 } },
+        e('button', { className: 'btn btn-sm', onClick: () => setShowAddPanel(p => !p) }, showAddPanel ? '✕ Cancel' : '+ Add Member')
+      ),
+      showAddPanel && e('div', { style: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' } },
+        e('select', { value: addId, onChange: ex => setAddId(ex.target.value), style: { flex: 1, minWidth: 200 } },
+          e('option', { value: '' }, '— Select a user to add —'),
+          available.map(u => e('option', { key: u._id, value: u._id }, u.name + ' (' + u.role + ')'))
+        ),
+        e('button', { className: 'btn btn-sm', onClick: addMember, disabled: !addId }, 'Add')
+      ),
+      e(PdEmpty, { icon: '◑', text: 'No team members yet' })
+    );
+
+    return e('div', { className: 'pd-fade' },
+      // Add member panel
+      canManage && e('div', { style: { marginBottom: 16 } },
+        e('button', { className: 'btn btn-sm', onClick: () => setShowAddPanel(p => !p) },
+          showAddPanel ? '✕ Cancel' : '+ Add Member'
+        )
+      ),
+      showAddPanel && canManage && e('div', { style: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 } },
+        e('select', { value: addId, onChange: ex => setAddId(ex.target.value), style: { flex: 1, minWidth: 200 } },
+          e('option', { value: '' }, '— Select a user to add —'),
+          available.map(u => e('option', { key: u._id, value: u._id }, u.name + ' (' + u.role + ')'))
+        ),
+        e('button', { className: 'btn btn-sm', onClick: addMember, disabled: !addId }, 'Add to Project')
+      ),
+
+      // Member grid
+      e('div', { className: 'pd-team-grid' },
+        members.map(m => {
+          const pct = m.total > 0 ? Math.round((m.done / m.total) * 100) : 0;
+          const user = m.user;
+          if (!user) return null;
+          return e('div', { key: user._id, className: 'pd-card' },
+            e('div', { style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 } },
+              e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+                e(PdAvatar, { name: user.name, size: 'md' }),
+                e('div', null,
+                  e('div', { style: { fontWeight: 600, fontSize: 14, color: 'var(--text)' } }, user.name),
+                  e('div', { style: { fontSize: 12, color: 'var(--text3)' } }, m.projectRole || user.role)
+                )
+              ),
+              canManage && e('button', {
+                className: 'pd-move-btn',
+                style: { color: 'var(--red)', borderColor: 'transparent', fontSize: 12, padding: '2px 6px' },
+                onClick: () => removeMember(user._id),
+                title: 'Remove from project'
+              }, '✕ Remove')
             ),
-            e('div', { className: 'pd-stat-item' },
-              e('div', { className: 'pd-stat-num', style: { color: 'var(--yellow)' } }, m.inProgress || 0),
-              e('div', { className: 'pd-stat-lbl' }, 'Active')
+            e('div', { className: 'pd-stat-row' },
+              e('div', { className: 'pd-stat-item' },
+                e('div', { className: 'pd-stat-num', style: { color: 'var(--text)' } }, m.total),
+                e('div', { className: 'pd-stat-lbl' }, 'Total')
+              ),
+              e('div', { className: 'pd-stat-item' },
+                e('div', { className: 'pd-stat-num', style: { color: 'var(--yellow)' } }, m.inProgress || 0),
+                e('div', { className: 'pd-stat-lbl' }, 'Active')
+              ),
+              e('div', { className: 'pd-stat-item' },
+                e('div', { className: 'pd-stat-num', style: { color: 'var(--green)' } }, m.done),
+                e('div', { className: 'pd-stat-lbl' }, 'Done')
+              )
             ),
-            e('div', { className: 'pd-stat-item' },
-              e('div', { className: 'pd-stat-num', style: { color: 'var(--green)' } }, m.done),
-              e('div', { className: 'pd-stat-lbl' }, 'Done')
+            e(WorkloadBar, { pct }),
+            e('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 5 } },
+              e('span', { style: { fontSize: 11, color: 'var(--text3)' } }, 'Completion'),
+              e('span', { style: { fontSize: 11, fontFamily: "'DM Mono',monospace", color: 'var(--text2)' } }, pct + '%')
             )
-          ),
-          e(WorkloadBar, { pct }),
-          e('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 5 } },
-            e('span', { style: { fontSize: 11, color: 'var(--text3)' } }, 'Completion'),
-            e('span', { style: { fontSize: 11, fontFamily: "'DM Mono',monospace", color: 'var(--text2)' } }, pct + '%')
-          )
-        );
-      })
+          );
+        })
+      )
     );
   }
 
@@ -858,15 +1011,25 @@
   ───────────────────────────────────────────── */
   function ProjectDashboard({ project: initialProject, onBack }) {
     const { user } = useAuth();
+    const toast = useToast();
     const canManage = user?.role === 'Manager' || user?.role === 'Admin';
     const [tab, setTab] = React.useState('Overview');
     const [data, setData] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const [refreshing, setRefreshing] = React.useState(false);
+    const [accessDenied, setAccessDenied] = React.useState(false);
 
     const load = (quiet) => {
       if (quiet) setRefreshing(true); else setLoading(true);
       api.get('/projects/' + initialProject._id + '/overview').then(d => {
+        // If the server returns 403, the user has been removed from the project
+        if (d._status === 403) {
+          toast('Your access to "' + initialProject.title + '" has been revoked.', 'error');
+          setAccessDenied(true);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
         if (!d.message) setData(d);
         setLoading(false);
         setRefreshing(false);
@@ -883,6 +1046,11 @@
       if (tab === 'Overview') load(true);
     }, [tab]);
 
+    // Auto-bounce back once access is revoked
+    React.useEffect(() => {
+      if (accessDenied) onBack();
+    }, [accessDenied]);
+
     const tabContent = () => {
       if (!data && tab === 'Overview') return e(Spinner);
       if (tab === 'Overview')   return e(OverviewTab,   { data, project: initialProject, canManage });
@@ -890,7 +1058,7 @@
       if (tab === 'Milestones') return e(MilestonesTab, { projectId: initialProject._id, canManage });
       if (tab === 'Backlog')    return e(BacklogTab,    { projectId: initialProject._id, canManage });
       if (tab === 'Bugs')       return e(BugsTab,       { projectId: initialProject._id });
-      if (tab === 'Team')       return e(TeamTab,       { memberWorkload: data?.memberWorkload });
+      if (tab === 'Team')       return e(TeamTab,       { projectId: initialProject._id, memberWorkload: data?.memberWorkload, canManage, onMembersChanged: () => load(true) });
       if (tab === 'Sprints')    return e(SprintsTab,    { projectId: initialProject._id, canManage });
       return null;
     };

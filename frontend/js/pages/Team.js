@@ -1,11 +1,13 @@
 // pages/Team.js
 function Team({ setPage }) {
+  const { user } = useAuth();
   const toast = useToast();
   const [users, setUsers]     = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [modal, setModal]     = React.useState(null);
   const [form, setForm]       = React.useState({ name: '', email: '', password: '', role: 'Developer' });
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const isAdmin = user?.role === 'Admin';
 
   const load = () => { setLoading(true); api.get('/users').then(d => { if (Array.isArray(d)) setUsers(d); setLoading(false); }); };
   React.useEffect(() => { load(); }, []);
@@ -14,14 +16,14 @@ function Team({ setPage }) {
     const r = modal === 'new' ? await api.post('/users', form) : await api.put('/users/' + modal._id, form);
     if (r._id) { toast('Saved'); setModal(null); load(); } else toast(r.message || 'Error', 'error');
   };
-  const del = async id => { if (!confirm('Delete user?')) return; await api.del('/users/' + id); toast('Deleted'); load(); };
+  const del = async id => { if (!confirm('Delete user?')) return; const r = await api.del('/users/' + id); if (r.message && r.message !== 'User deleted') { toast(r.message, 'error'); } else { toast('Deleted'); load(); } };
   const openNew  = ()  => { setForm({ name: '', email: '', password: '', role: 'Developer' }); setModal('new'); };
   const openEdit = u   => { setForm({ name: u.name, email: u.email, password: '', role: u.role }); setModal(u); };
 
   return React.createElement('div', null,
     React.createElement(PageHeader, {
       title: 'Team', subtitle: users.length + ' members',
-      action: React.createElement('button', { className: 'btn', onClick: openNew }, '+ Add Member')
+      action: isAdmin && React.createElement('button', { className: 'btn', onClick: openNew }, '+ Add Member')
     }),
 
     loading ? React.createElement(Spinner) :
@@ -35,10 +37,19 @@ function Team({ setPage }) {
             ),
             React.createElement(StatusBadge, { status: u.role })
           ),
-          React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 12 } },
-            React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(u) }, 'Edit'),
-            React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(u._id) }, 'Remove')
-          )
+          // Admin accounts: show a read-only notice — no edit/delete buttons
+          u.role === 'Admin'
+            ? React.createElement('div', {
+                style: { marginTop: 10, padding: '6px 10px', borderRadius: 6, background: 'rgba(79,156,249,.08)', border: '1px solid rgba(79,156,249,.2)', fontSize: 11, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 6 }
+              },
+                React.createElement('span', null, '🔒'),
+                'Protected — changes require database access'
+              )
+            // Non-Admin accounts: show edit/delete for Admin users only
+            : isAdmin && React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 12 } },
+                React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(u) }, 'Edit'),
+                React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(u._id) }, 'Remove')
+              )
         )
       )
     ),
@@ -52,8 +63,12 @@ function Team({ setPage }) {
         ),
         React.createElement(Field, { label: 'Role' },
           React.createElement('select', { value: form.role, onChange: e => setF('role', e.target.value) },
-            ['Admin', 'Manager', 'Developer', 'Tester'].map(r => React.createElement('option', { key: r, value: r }, r))
+            // Admin is excluded — Admin accounts can only be created via code/database
+            ['Manager', 'Developer', 'Tester'].map(r => React.createElement('option', { key: r, value: r }, r))
           )
+        ),
+        React.createElement('div', { style: { fontSize: 11, color: 'var(--text3)', marginTop: 4 } },
+          '⚠ Admin accounts can only be created directly in the database.'
         ),
         React.createElement('div', { style: { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 } },
           React.createElement('button', { className: 'btn btn-ghost', onClick: () => setModal(null) }, 'Cancel'),
@@ -63,3 +78,4 @@ function Team({ setPage }) {
     )
   );
 }
+

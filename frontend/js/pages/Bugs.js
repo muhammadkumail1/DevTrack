@@ -38,6 +38,7 @@ function BugForm({ initial, projects, users, onSave, onClose }) {
 }
 
 function Bugs({ setPage }) {
+  const { user } = useAuth();
   const toast = useToast();
   const [bugs, setBugs]         = React.useState([]);
   const [loading, setLoading]   = React.useState(true);
@@ -45,6 +46,7 @@ function Bugs({ setPage }) {
   const [projects, setProjects] = React.useState([]);
   const [users, setUsers]       = React.useState([]);
   const [filter, setFilter]     = React.useState({ project: '', severity: '', status: '' });
+  const canDelete = user?.role === 'Manager' || user?.role === 'Admin';
 
   const load = () => {
     setLoading(true);
@@ -115,7 +117,7 @@ function Bugs({ setPage }) {
           React.createElement('div', { style: { display: 'flex', gap: 4, justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' } },
             React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(b) }, 'Edit'),
             b.status !== 'Closed' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => close(b._id) }, 'Close'),
-            React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(b._id) }, 'Del')
+            canDelete && React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(b._id) }, 'Del')
           )
         )
       )

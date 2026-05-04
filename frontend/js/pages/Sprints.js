@@ -9,6 +9,7 @@ function Sprints({ setPage }) {
   const [filter, setFilter]     = React.useState('');
   const [form, setForm]         = React.useState({ name: '', project: '', startDate: '', endDate: '', status: 'Planned' });
   const isManager = user?.role === 'Manager';
+  const canManage = isManager || user?.role === 'Admin';
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const load = () => {
@@ -29,7 +30,7 @@ function Sprints({ setPage }) {
   return React.createElement('div', null,
     React.createElement(PageHeader, {
       title: 'Sprints', subtitle: sprints.length + ' sprints',
-      action: isManager && React.createElement('button', { className: 'btn', onClick: openNew }, '+ New Sprint')
+      action: canManage && React.createElement('button', { className: 'btn', onClick: openNew }, '+ New Sprint')
     }),
     React.createElement('select', { style: { width: 200, marginBottom: 20 }, value: filter, onChange: e => setFilter(e.target.value) },
       React.createElement('option', { value: '' }, 'All Projects'),
@@ -55,7 +56,7 @@ function Sprints({ setPage }) {
             ),
             React.createElement(ProgressBar, { pct: s.progress || 0 })
           ),
-          isManager && React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 12 } },
+          canManage && React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 12 } },
             React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(s) }, 'Edit'),
             React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(s._id) }, 'Delete')
           )

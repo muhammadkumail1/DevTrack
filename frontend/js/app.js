@@ -1,7 +1,16 @@
 // app.js — root App component and entry point
 function App() {
   const { user, loading } = useAuth();
-  const [page, setPage] = React.useState('dashboard');
+  const [page, setPageRaw] = React.useState('dashboard');
+
+  // Role-gated navigation: prevent unauthorized page access
+  const setPage = (p) => {
+    const isAdmin   = user?.role === 'Admin';
+    const isManager = user?.role === 'Manager';
+    if (p === 'roles'  && !isAdmin)            return; // Admin only
+    if (p === 'team'   && !isAdmin && !isManager) return; // Manager + Admin
+    setPageRaw(p);
+  };
 
   if (loading) return React.createElement('div', {
     style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }
@@ -18,6 +27,8 @@ function App() {
     milestones: Milestones,
     reports:    Reports,
     team:       Team,
+    worklogs:   WorkLogs,
+    roles:      Roles,
   };
 
   const Page = pages[page] || Dashboard;

@@ -8,6 +8,7 @@ function WorkLogs({ setPage }) {
   const [loading, setLoading] = React.useState(true);
   const [modal, setModal] = React.useState(null);
   const [form, setForm] = React.useState({ user: '', task: '', hours: '', date: '' });
+  const canManage = user?.role === 'Manager' || user?.role === 'Admin';
 
   const load = async () => {
     setLoading(true);
@@ -26,7 +27,8 @@ function WorkLogs({ setPage }) {
 
   const openNew = () => {
     setForm({
-      user: user?._id || '',
+      // Developers default to themselves; Manager/Admin can pick anyone
+      user: canManage ? '' : (user?._id || ''),
       task: '',
       hours: '',
       date: new Date().toISOString().split('T')[0],
@@ -106,7 +108,7 @@ function WorkLogs({ setPage }) {
               React.createElement('div', null, fmt(entry.date)),
               React.createElement('div', { style: { display: 'flex', gap: 4 } },
                 React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(entry) }, 'Edit'),
-                React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => remove(entry._id) }, 'Del')
+                canManage && React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => remove(entry._id) }, 'Del')
               )
             )
           )
@@ -114,13 +116,15 @@ function WorkLogs({ setPage }) {
 
     modal && React.createElement(Modal, { title: modal === 'new' ? 'New Work Log' : 'Edit Work Log', onClose: () => setModal(null) },
       React.createElement(Field, { label: 'Team Member' },
-        React.createElement('select', {
-          value: form.user,
-          onChange: (e) => setForm((prev) => ({ ...prev, user: e.target.value }))
-        },
-          React.createElement('option', { value: '' }, 'Select member'),
-          users.map((u) => React.createElement('option', { key: u._id, value: u._id }, u.name + ' (' + u.role + ')'))
-        )
+        canManage
+          ? React.createElement('select', {
+              value: form.user,
+              onChange: (e) => setForm((prev) => ({ ...prev, user: e.target.value }))
+            },
+              React.createElement('option', { value: '' }, 'Select member'),
+              users.map((u) => React.createElement('option', { key: u._id, value: u._id }, u.name + ' (' + u.role + ')'))
+            )
+          : React.createElement('input', { value: user?.name || '', disabled: true, style: { opacity: 0.6 } })
       ),
       React.createElement(Field, { label: 'Task' },
         React.createElement('select', {

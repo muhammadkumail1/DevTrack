@@ -1,7 +1,28 @@
 // pages/Projects.js
 function ProjectForm({ initial, onSave, onClose }) {
-  const [form, setForm] = React.useState(initial || { title: '', description: '', status: 'Active', startDate: '', endDate: '' });
+  const [form, setForm] = React.useState(initial || { title: '', description: '', status: 'Active', startDate: '', endDate: '', members: [] });
+  const [allUsers, setAllUsers] = React.useState([]);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  React.useEffect(() => {
+    api.get('/users').then(d => Array.isArray(d) && setAllUsers(d));
+    // Pre-populate members from initial (they arrive as objects with _id)
+    if (initial?.members) {
+      setForm(p => ({
+        ...p,
+        members: initial.members.map(m => m._id || m)
+      }));
+    }
+  }, []);
+
+  const toggleMember = (uid) => {
+    setForm(p => ({
+      ...p,
+      members: p.members.includes(uid)
+        ? p.members.filter(id => id !== uid)
+        : [...p.members, uid]
+    }));
+  };
 
   return React.createElement('div', null,
     React.createElement(Field, { label: 'Title' }, React.createElement('input', { value: form.title, onChange: e => set('title', e.target.value), placeholder: 'Project title' })),
@@ -13,6 +34,33 @@ function ProjectForm({ initial, onSave, onClose }) {
     React.createElement(Field, { label: 'Status' },
       React.createElement('select', { value: form.status, onChange: e => set('status', e.target.value) },
         ['Active', 'Completed', 'Archived'].map(s => React.createElement('option', { key: s, value: s }, s))
+      )
+    ),
+    React.createElement(Field, { label: 'Team Members' },
+      React.createElement('div', null,
+        // Chips for selected members
+        form.members.length > 0 && React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 } },
+          form.members.map(uid => {
+            const u = allUsers.find(x => (x._id || x) === uid);
+            return u ? React.createElement('span', {
+              key: uid,
+              style: { display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 20, padding: '2px 8px', fontSize: 11, color: 'var(--text2)' }
+            },
+              u.name,
+              React.createElement('span', { style: { cursor: 'pointer', color: 'var(--text3)', fontWeight: 700, marginLeft: 2 }, onClick: () => toggleMember(uid) }, '×')
+            ) : null;
+          })
+        ),
+        React.createElement('select', {
+          value: '',
+          onChange: e => { if (e.target.value) toggleMember(e.target.value); },
+          style: { width: '100%' }
+        },
+          React.createElement('option', { value: '' }, '— Add a member —'),
+          allUsers.filter(u => !form.members.includes(u._id)).map(u =>
+            React.createElement('option', { key: u._id, value: u._id }, u.name + ' (' + u.role + ')')
+          )
+        )
       )
     ),
     React.createElement('div', { style: { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 } },
@@ -29,7 +77,9 @@ function Projects({ setPage }) {
   const [loading, setLoading] = React.useState(true);
   const [modal, setModal] = React.useState(null);
   const [activeProject, setActiveProject] = React.useState(null);
-  const canManage = user?.role === 'Manager' || user?.role === 'Admin';
+  const isAdmin   = user?.role === 'Admin';
+  const isManager = user?.role === 'Manager';
+  const canManage = isManager || isAdmin; // can create / edit / archive
 
   const load = () => {
     setLoading(true);
@@ -45,7 +95,7 @@ function Projects({ setPage }) {
   const del = async id => { if (!confirm('Delete this project?')) return; await api.del('/projects/' + id); toast('Deleted'); load(); };
 
   if (activeProject) {
-    return React.createElement(window.ProjectDashboard, { project: activeProject, onBack: () => setActiveProject(null) });
+    return React.createElement(window.ProjectDashboard, { project: activeProject, onBack: () => { setActiveProject(null); load(); } });
   }
 
   return React.createElement('div', null,
@@ -76,11 +126,13 @@ function Projects({ setPage }) {
             React.createElement('span', { style: { fontSize: 11, color: 'var(--text3)' } }, p.manager?.name || '—'),
             React.createElement('div', { style: { display: 'flex', gap: 6 } },
               React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setActiveProject(p) }, 'Open'),
-              canManage && React.createElement(React.Fragment, null,
+              // Managers can only edit/archive projects they own; Admin can edit all
+              canManage && (isAdmin || p.manager?._id === user?._id || p.manager === user?._id) && React.createElement(React.Fragment, null,
                 React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(p) }, 'Edit'),
-                p.status !== 'Archived' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => archive(p._id) }, 'Archive'),
-                React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(p._id) }, 'Del')
-              )
+                p.status !== 'Archived' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => archive(p._id) }, 'Archive')
+              ),
+              // Only Admin can permanently delete
+              isAdmin && React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(p._id) }, 'Del')
             )
           )
         )

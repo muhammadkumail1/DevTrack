@@ -48,6 +48,7 @@ function TaskForm({ initial, projects, users, sprints, onSave, onClose }) {
 }
 
 function Tasks({ setPage }) {
+  const { user } = useAuth();
   const toast = useToast();
   const [tasks, setTasks]       = React.useState([]);
   const [loading, setLoading]   = React.useState(true);
@@ -56,6 +57,7 @@ function Tasks({ setPage }) {
   const [users, setUsers]       = React.useState([]);
   const [sprints, setSprints]   = React.useState([]);
   const [filter, setFilter]     = React.useState({ project: '', status: '' });
+  const canDelete = user?.role === 'Manager' || user?.role === 'Admin';
 
   const load = () => {
     setLoading(true);
@@ -122,7 +124,7 @@ function Tasks({ setPage }) {
           React.createElement('div', { style: { fontSize: 11, color: 'var(--text3)' } }, fmt(t.dueDate)),
           React.createElement('div', { style: { display: 'flex', gap: 4, justifyContent: 'flex-start', alignItems: 'center' } },
             React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(t) }, 'Edit'),
-            React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(t._id) }, 'Del')
+            canDelete && React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(t._id) }, 'Del')
           )
         )
       )

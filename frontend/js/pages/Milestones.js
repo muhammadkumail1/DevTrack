@@ -8,6 +8,7 @@ function Milestones({ setPage }) {
   const [projects, setProjects] = React.useState([]);
   const [form, setForm]         = React.useState({ title: '', description: '', project: '', dueDate: '', status: 'Pending' });
   const isManager = user?.role === 'Manager';
+  const canManage = isManager || user?.role === 'Admin';
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const load = () => { setLoading(true); api.get('/milestones').then(d => { if (Array.isArray(d)) setItems(d); setLoading(false); }); };
@@ -24,7 +25,7 @@ function Milestones({ setPage }) {
   return React.createElement('div', null,
     React.createElement(PageHeader, {
       title: 'Milestones', subtitle: items.length + ' milestones',
-      action: React.createElement('button', { className: 'btn', onClick: openNew }, '+ New Milestone')
+      action: canManage && React.createElement('button', { className: 'btn', onClick: openNew }, '+ New Milestone')
     }),
 
     loading ? React.createElement(Spinner) :
@@ -47,7 +48,7 @@ function Milestones({ setPage }) {
           React.createElement('div', { style: { fontSize: 12, color: 'var(--text3)' } }, fmt(m.dueDate)),
           React.createElement(StatusBadge, { status: m.status }),
           React.createElement('div', { style: { display: 'flex', gap: 4 } },
-            React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(m) }, 'Edit'),
+            canManage && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => openEdit(m) }, 'Edit'),
             isManager && m.status !== 'Approved' && React.createElement('button', { className: 'btn btn-sm', onClick: () => approve(m._id) }, 'Approve')
           )
         )
