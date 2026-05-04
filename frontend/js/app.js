@@ -18,12 +18,17 @@ function App() {
     milestones: Milestones,
     reports:    Reports,
     team:       Team,
+    roles:      Roles,
+    worklogs:   WorkLogs,
   };
 
   const Page = pages[page] || Dashboard;
 
-  return React.createElement(Layout, { page, setPage },
-    React.createElement(Page)
+  return React.createElement(React.Fragment, null,
+    React.createElement(Layout, { page, setPage },
+      React.createElement(Page)
+    ),
+    React.createElement(AIAssistant, null)
   );
 }
 

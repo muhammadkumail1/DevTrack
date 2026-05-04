@@ -36,7 +36,7 @@ function AuthPage() {
       ),
       mode === 'register' && React.createElement(Field, { label: 'Role' },
         React.createElement('select', { value: form.role, onChange: e => set('role', e.target.value) },
-          ['Developer', 'Tester', 'Manager'].map(r => React.createElement('option', { key: r, value: r }, r))
+          ['Developer', 'Tester', 'Manager', 'Admin'].map(r => React.createElement('option', { key: r, value: r }, r))
         )
       ),
 

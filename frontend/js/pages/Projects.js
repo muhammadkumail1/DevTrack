@@ -28,7 +28,8 @@ function Projects() {
   const [projects, setProjects] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [modal, setModal] = React.useState(null);
-  const isManager = user?.role === 'Manager';
+  const [activeProject, setActiveProject] = React.useState(null);
+  const canManage = user?.role === 'Manager' || user?.role === 'Admin';
 
   const load = () => {
     setLoading(true);
@@ -43,10 +44,14 @@ function Projects() {
   const archive = async id => { await api.patch('/projects/' + id + '/archive'); toast('Archived'); load(); };
   const del = async id => { if (!confirm('Delete this project?')) return; await api.del('/projects/' + id); toast('Deleted'); load(); };
 
+  if (activeProject) {
+    return React.createElement(window.ProjectDashboard, { project: activeProject, onBack: () => setActiveProject(null) });
+  }
+
   return React.createElement('div', null,
     React.createElement(PageHeader, {
       title: 'Projects', subtitle: projects.length + ' total',
-      action: isManager && React.createElement('button', { className: 'btn', onClick: () => setModal('create') }, '+ New Project')
+      action: canManage && React.createElement('button', { className: 'btn', onClick: () => setModal('create') }, '+ New Project')
     }),
 
     loading ? React.createElement(Spinner) :
@@ -69,10 +74,13 @@ function Projects() {
           ),
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
             React.createElement('span', { style: { fontSize: 11, color: 'var(--text3)' } }, p.manager?.name || '—'),
-            isManager && React.createElement('div', { style: { display: 'flex', gap: 6 } },
-              React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(p) }, 'Edit'),
-              p.status !== 'Archived' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => archive(p._id) }, 'Archive'),
-              React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(p._id) }, 'Del')
+            React.createElement('div', { style: { display: 'flex', gap: 6 } },
+              React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setActiveProject(p) }, 'Open'),
+              canManage && React.createElement(React.Fragment, null,
+                React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => setModal(p) }, 'Edit'),
+                p.status !== 'Archived' && React.createElement('button', { className: 'btn btn-ghost btn-sm', onClick: () => archive(p._id) }, 'Archive'),
+                React.createElement('button', { className: 'btn btn-danger btn-sm', onClick: () => del(p._id) }, 'Del')
+              )
             )
           )
         )

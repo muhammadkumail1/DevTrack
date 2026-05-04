@@ -52,7 +52,7 @@ function Team() {
         ),
         React.createElement(Field, { label: 'Role' },
           React.createElement('select', { value: form.role, onChange: e => setF('role', e.target.value) },
-            ['Manager', 'Developer', 'Tester'].map(r => React.createElement('option', { key: r, value: r }, r))
+            ['Admin', 'Manager', 'Developer', 'Tester'].map(r => React.createElement('option', { key: r, value: r }, r))
           )
         ),
         React.createElement('div', { style: { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 } },

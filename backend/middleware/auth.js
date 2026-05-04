@@ -25,11 +25,19 @@ const protect = async (req, res, next) => {
 };
 
 const managerOnly = (req, res, next) => {
-  if (req.user && req.user.role === "Manager") {
+  if (req.user && (req.user.role === "Manager" || req.user.role === "Admin")) {
     next();
   } else {
-    res.status(403).json({ message: "Access denied. Manager role required." });
+    res.status(403).json({ message: "Access denied. Manager or Admin role required." });
   }
 };
 
-module.exports = { protect, managerOnly };
+const adminOnly = (req, res, next) => {
+  if (req.user && req.user.role === "Admin") {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Admin role required." });
+  }
+};
+
+module.exports = { protect, managerOnly, adminOnly };
